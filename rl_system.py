@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import tensorflow as tf
 from anet import ANet
+from hex_game import HexGame
 from mcts import MCTS
 from nim_game import NimGame
 
@@ -80,39 +81,7 @@ class RLSystem:
 
 
 if __name__ == "__main__":
-    n = 10
-    k = 2
-    ng = NimGame(n, k)
-    rls = RLSystem(ng, 0.03, 1000, 1, 10, 50)
+    k = 3
+    hex = HexGame(k)
+    rls = RLSystem(hex, 0.03, 100, 1, 10, 100)
     rls.rl_algorithm()
-    pos = rls.mcts.game_board.get_position()
-    print(
-        f"State: 10 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 9 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 8 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 7 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 6 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 5 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 4 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 3 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 2 stones left - {rls.anet.nn(np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: 1 stones left - {rls.anet.nn(np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )

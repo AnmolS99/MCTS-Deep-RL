@@ -163,7 +163,7 @@ class MCTS:
         probs = self.anet.nn(state).numpy()
 
         # Getting indices of all legal actions
-        legal_actions_idx = self.game_board.get_legal_actions_idx(
+        legal_actions_idx = self.game_board.get_legal_actions(
             self.game_board.get_position())
 
         # Getting the probabilities and normalizing over them
@@ -174,7 +174,8 @@ class MCTS:
 
         legal_actions[:, legal_actions_idx] = legal_actions_probs
 
-        return np.argmax(legal_actions) + 1
+        # Returning the index of the action with the highest probability
+        return np.argmax(legal_actions)
 
     def argmax_Q_augmented(self, s, possible_actions, c):
         """
@@ -208,22 +209,18 @@ class MCTS:
         # Getting all legal actions from s_0
         legal_actions = self.game_board.get_legal_actions(s_0)
 
-        # Getting indices of all legal actions
-        legal_actions_idx = self.game_board.get_legal_actions_idx(s_0)
-
         # Getting the dimension of the output i.e. the one-hot actions vector
         visits = np.zeros(self.game_board.get_output_dim())
 
         # Visit counts of all legal actions
         for i in range(len(legal_actions)):
             a = legal_actions[i]
-            a_idx = legal_actions_idx[i]
-            visits[a_idx] = self.N[(s_0, a)]
+            visits[a] = self.N[(s_0, a)]
 
         # Normalizing
-        visits_legal_norm = normalize_vector(visits[legal_actions_idx])
+        visits_legal_norm = normalize_vector(visits[legal_actions])
 
-        visits[legal_actions_idx] = visits_legal_norm
+        visits[legal_actions] = visits_legal_norm
 
         return visits
 

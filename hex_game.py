@@ -56,12 +56,12 @@ class HexGame:
         black_player_won, path = self.check_player_won(0)
         if black_player_won:
             self.black_won = True
-            return True, path
+            return True
         red_player_won, path = self.check_player_won(1)
         if red_player_won:
             self.black_won = False
-            return True, path
-        return False, None
+            return True
+        return False
 
     def check_player_won(self, player):
         """
@@ -189,14 +189,6 @@ class HexGame:
         for legal_cell in legal:
             legal_num.append(self.cell_to_num(legal_cell))
         return np.array(legal_num)
-
-    def get_legal_actions_idx(self, one_hot_state: tuple):
-        """
-        Getting the legal actions indexes for a given player
-        
-        state: one-hot encoding of player turn and board state
-        """
-        return self.get_legal_actions(one_hot_state)
 
     def get_input_dim(self):
         """

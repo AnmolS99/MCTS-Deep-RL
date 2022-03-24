@@ -22,7 +22,7 @@ class NimGame:
         if pieces_remove in self.get_legal_actions(self.get_position()):
 
             # Removing pieces from the board
-            self.N -= pieces_remove
+            self.N -= pieces_remove + 1
 
             # Next time other players turn
             self.black_to_play = not self.black_to_play
@@ -53,17 +53,7 @@ class NimGame:
         """
         state = self.rev_one_hot(np.array(list(one_hot_state)))
         n = state[1]
-        return np.array([i for i in range(1, min(n, self.K) + 1)])
-
-    def get_legal_actions_idx(self, one_hot_state: tuple):
-        """
-        Getting the legal actions indexes for a given player
-        
-        state: one-hot encoding of player turn and board state
-        """
-        legal_actions = self.get_legal_actions(one_hot_state)
-        legal_actions_idx = legal_actions - 1
-        return legal_actions_idx
+        return np.array([i for i in range(0, min(n, self.K))])
 
     def get_input_dim(self):
         """
@@ -140,4 +130,4 @@ class NimGame:
         Returns the an action given a distribution over all possible actions.
         Action selection is based on this distribution.
         """
-        return np.random.choice(range(len(distribution)), p=distribution) + 1
+        return np.random.choice(range(len(distribution)), p=distribution)
