@@ -86,22 +86,6 @@ if __name__ == "__main__":
     rls = RLSystem(ng, 0.03, 1000, 1, 10, 50)
     rls.rl_algorithm()
     pos = rls.mcts.game_board.get_position()
-    # print(
-    #     f"State: 5 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 1]).reshape(1, -1))}"
-    # )
-    # print(
-    #     f"State: 4 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 1, 0]).reshape(1, -1))}"
-    # )
-    # print(
-    #     f"State: 3 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 1, 0, 0]).reshape(1, -1))}"
-    # )
-    # print(
-    #     f"State: 2 stones left - {rls.anet.nn(np.array([0, 0, 0, 1, 0, 0, 0]).reshape(1, -1))}"
-    # )
-    # print(
-    #     f"State: 1 stones left - {rls.anet.nn(np.array([0, 0, 1, 0, 0, 0, 0]).reshape(1, -1))}"
-    # )
-
     print(
         f"State: 10 stones left - {rls.anet.nn(np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]).reshape(1, -1))}"
     )
