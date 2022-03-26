@@ -33,7 +33,7 @@ class RLSystem:
         anet = ANet(nn_specs, self.anet_lr)
         return anet
 
-    def rl_algorithm(self):
+    def rl_algorithm(self, show_game=False):
         # 1. Need to save anet params
         i_s = self.checkpoints
 
@@ -54,6 +54,10 @@ class RLSystem:
             # c) Initialize MCTS to root s_init
             root = s_init
 
+            # Showing the initial game state
+            if show_game:
+                self.game.display_state(root)
+
             # d) While B_a not in a final state
             while not self.game.game_over():
 
@@ -69,6 +73,10 @@ class RLSystem:
 
                 root = s_star
 
+                # Showing game state
+                if show_game:
+                    self.game.display_state(root)
+
             # e) Train ANet on a random minibatch of cases from RBUF
             states = [t[0] for t in self.rbuf]
             distibutions = [t[1] for t in self.rbuf]
@@ -83,5 +91,16 @@ class RLSystem:
 if __name__ == "__main__":
     k = 3
     hex = HexGame(k)
-    rls = RLSystem(hex, 0.03, 100, 1, 10, 100)
-    rls.rl_algorithm()
+    rls = RLSystem(hex,
+                   anet_lr=0.03,
+                   num_search_games=100,
+                   c=1,
+                   num_actual_games=10,
+                   checkpoints=10)
+    rls.rl_algorithm(show_game=True)
+    print(
+        f"State: Black player turn - {rls.anet.nn(np.array([1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]).reshape(1, -1))}"
+    )
+    print(
+        f"State: Black player turn - {rls.anet.nn(np.array([1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
+    )

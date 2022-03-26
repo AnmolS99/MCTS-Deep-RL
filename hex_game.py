@@ -1,5 +1,8 @@
 from copy import deepcopy
+import random
 import numpy as np
+import matplotlib.pyplot as plt
+import networkx as nx
 
 
 class HexGame:
@@ -277,11 +280,66 @@ class HexGame:
         """
         return np.random.choice(range(len(distribution)), p=distribution)
 
+    def display_state(self, one_hot_state):
+        """
+        Uses graphics to display a state of a Hex game
+        """
+        state = self.rev_one_hot(np.array(list(one_hot_state)))
+        black_to_play = state[0]
+        board = state[1]
+        player = "Black" if black_to_play else "Red"
+        plt.title(f"{player} players turn to play")
+
+        graph = nx.Graph()
+
+        pos = {}
+        edgelist = []
+        # Iterating over rows
+        for i in range(self.K):
+
+            # Iterating over columns
+            for j in range(self.K):
+                node_idx = i * self.K + j
+
+                # If current node is not on the last row, add edge to the node below
+                if i < self.K - 1:
+                    edgelist.append([node_idx, node_idx + self.K])
+
+                    # If current node is neither on the first column, add edge to the node below to the left
+                    if j % self.K != 0:
+                        edgelist.append([node_idx, node_idx + self.K - 1])
+
+                # If current node is not on the first column, add edge to the node to the left
+                if j % self.K != 0:
+                    edgelist.append([node_idx, node_idx - 1])
+
+                # Calculating position/coordinates of nodes
+                x = self.K * 2 - i + j
+                y = self.K * 2 - i - j
+                pos[node_idx] = (x, y)
+
+        graph.add_edges_from(edgelist)
+
+        color_list = []
+        for node in graph.nodes():
+            # Selecting colors indicating if there is a piece placed on the node/space
+            row = node // self.K
+            col = node % self.K
+            if board[row, col, 0] == 1:
+                color_list.append("black")
+            elif board[row, col, 1] == 1:
+                color_list.append("red")
+            else:
+                color_list.append("white")
+
+        nx.draw(graph, pos, node_color=color_list, edgecolors="black")
+
+        plt.show()
+
 
 if __name__ == "__main__":
     h = HexGame(3)
     h.set_position(
-        (1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0))
-    print(h.game_over())
-    print(h.black_wins())
-    print(h.get_legal_actions(h.get_position()))
+        (1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0))
+    h.display_state(
+        (1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0))
