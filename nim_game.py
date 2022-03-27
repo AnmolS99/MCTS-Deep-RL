@@ -124,10 +124,3 @@ class NimGame:
         one_hot_board = one_hot_encoding[1:]
         n = np.where(one_hot_board == 1)[0][0]
         return (black_to_play, n)
-
-    def get_best_action(self, distribution):
-        """
-        Returns the an action given a distribution over all possible actions.
-        Action selection is based on this distribution.
-        """
-        return np.random.choice(range(len(distribution)), p=distribution)

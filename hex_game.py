@@ -273,13 +273,6 @@ class HexGame:
         """
         return (cell[0] * self.K) + cell[1]
 
-    def get_best_action(self, distribution):
-        """
-        Returns the an action given a distribution over all possible actions.
-        Action selection is based on this distribution.
-        """
-        return np.random.choice(range(len(distribution)), p=distribution)
-
     def display_state(self, one_hot_state):
         """
         Uses graphics to display a state of a Hex game

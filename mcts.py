@@ -1,3 +1,4 @@
+from random import random
 import numpy as np
 from anet import ANet
 
@@ -9,11 +10,12 @@ class MCTS:
     Monte-Carlo Search Tree algorithm
     """
 
-    def __init__(self, game_board, anet, time_available, c) -> None:
+    def __init__(self, game_board, anet, time_available, c, eps) -> None:
         self.game_board = game_board  # The game that is being played
         self.anet = anet  # The actor net used to provide the default policy
         self.time_available = time_available  # The time available to perform a uct search
         self.c = c  # Constant representing the importance of exploration in the tree policy
+        self.eps = eps  #   Epsilon value, probability of choosing random action during rollout, thus representing how exploratory the default policy is
         self.N = dict(
         )  # Dictionary tracking visits to states and state-action pairs
         self.Q = dict(
@@ -37,7 +39,7 @@ class MCTS:
         self.game_board.set_position(s_0)
         # Get the distribution D
         distribution = self.get_distribution(s_0)
-        return self.game_board.get_best_action(distribution), distribution
+        return distribution
 
     def simulate(self, s_0):
         """
@@ -174,8 +176,12 @@ class MCTS:
 
         legal_actions[:, legal_actions_idx] = legal_actions_probs
 
-        # Returning the index of the action with the highest probability
-        return np.argmax(legal_actions)
+        # Returning the index of the chosen action, which is the action with highest probability or a random action (with eps probability)
+        if random.random() < self.eps:
+            chosen_action = np.random.choice(range(len(legal_actions)))
+        else:
+            chosen_action = np.argmax(legal_actions)
+        return chosen_action
 
     def argmax_Q_augmented(self, s, possible_actions, c):
         """

@@ -13,13 +13,14 @@ class RLSystem:
     where one move in an actual game is based on multiple MCTS simulations
     """
 
-    def __init__(self, game, anet_lr, num_search_games, c, num_actual_games,
-                 checkpoints) -> None:
+    def __init__(self, game, anet_lr, num_search_games, c, eps,
+                 num_actual_games, checkpoints) -> None:
         self.game = game
         self.anet_lr = anet_lr
         self.anet = self.create_anet()
         self.rbuf = []
-        self.mcts = MCTS(copy.deepcopy(game), self.anet, num_search_games, c)
+        self.mcts = MCTS(copy.deepcopy(game), self.anet, num_search_games, c,
+                         eps)
         self.num_actual_games = num_actual_games
         self.checkpoints = checkpoints
 
@@ -62,10 +63,14 @@ class RLSystem:
             while not self.game.game_over():
 
                 # Initialize Monte Carlo board (B_mc) to same state as root, and play number_search_games
-                a_star, distribution = self.mcts.uct_search(root)
+                distribution = self.mcts.uct_search(root)
 
                 # Adding case (root, D) to RBUF
                 self.rbuf.append((root, distribution))
+
+                # Chooses actual move based on distribution
+                a_star = np.random.choice(range(len(distribution)),
+                                          p=distribution)
 
                 # Performing a_star to produce s_star
                 self.game.play(a_star)
@@ -83,8 +88,8 @@ class RLSystem:
             self.anet.nn.fit(np.array(states), np.array(distibutions))
 
             # f) If g_a is a checkpoint, save the parameters
-            if g_a % i_s == 0:
-                # self.anet.nn.save(f"/models/model_after_{g_a}")
+            if g_a % (self.num_actual_games // self.checkpoints) == 0:
+                self.anet.nn.save(f"models/model_after_{g_a}")
                 print("Checkpoint!")
 
 
@@ -95,9 +100,10 @@ if __name__ == "__main__":
                    anet_lr=0.03,
                    num_search_games=100,
                    c=1,
+                   eps=0.1,
                    num_actual_games=10,
-                   checkpoints=10)
-    rls.rl_algorithm(show_game=True)
+                   checkpoints=2)
+    rls.rl_algorithm(show_game=False)
     print(
         f"State: Black player turn - {rls.anet.nn(np.array([1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]).reshape(1, -1))}"
     )
