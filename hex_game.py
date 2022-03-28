@@ -12,7 +12,7 @@ class HexGame:
 
     def __init__(self, K, black_to_play=True) -> None:
         self.K = K  # Row and column length
-        self.black_to_play_start = black_to_play  # Whether black begins the game
+        self.black_to_play_start = black_to_play  # Whether black (player 1) begins the game
         self.black_to_play = black_to_play  # Whose turn it is
         self.board = np.zeros((self.K, self.K, 2))
         self.black_won = None

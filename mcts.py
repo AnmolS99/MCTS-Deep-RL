@@ -1,4 +1,4 @@
-from random import random
+import random
 import numpy as np
 from anet import ANet
 
@@ -178,7 +178,8 @@ class MCTS:
 
         # Returning the index of the chosen action, which is the action with highest probability or a random action (with eps probability)
         if random.random() < self.eps:
-            chosen_action = np.random.choice(range(len(legal_actions)))
+            non_zero_idx = np.nonzero(legal_actions)[1]
+            chosen_action = np.random.choice(non_zero_idx)
         else:
             chosen_action = np.argmax(legal_actions)
         return chosen_action

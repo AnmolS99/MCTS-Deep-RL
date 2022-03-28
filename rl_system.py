@@ -1,10 +1,6 @@
 import copy
 import numpy as np
-import tensorflow as tf
-from anet import ANet
-from hex_game import HexGame
 from mcts import MCTS
-from nim_game import NimGame
 
 
 class RLSystem:
@@ -13,26 +9,15 @@ class RLSystem:
     where one move in an actual game is based on multiple MCTS simulations
     """
 
-    def __init__(self, game, anet_lr, num_search_games, c, eps,
-                 num_actual_games, checkpoints) -> None:
+    def __init__(self, game, anet, num_search_games, c, eps, num_actual_games,
+                 checkpoints) -> None:
         self.game = game
-        self.anet_lr = anet_lr
-        self.anet = self.create_anet()
+        self.anet = anet
         self.rbuf = []
         self.mcts = MCTS(copy.deepcopy(game), self.anet, num_search_games, c,
                          eps)
         self.num_actual_games = num_actual_games
         self.checkpoints = checkpoints
-
-    def create_anet(self):
-        """
-        Creates anet based on the game that is being played
-        """
-        input_nodes = self.game.get_input_dim()
-        output_nodes = self.game.get_output_dim()
-        nn_specs = (input_nodes, 100, 100, 100, 100, output_nodes)
-        anet = ANet(nn_specs, self.anet_lr)
-        return anet
 
     def rl_algorithm(self, show_game=False):
         # 1. Need to save anet params
@@ -44,7 +29,7 @@ class RLSystem:
         # 3. Randomly initialize params for anet
 
         # 4. Iterate over number of actual games
-        for g_a in range(self.num_actual_games):
+        for g_a in range(self.num_actual_games + 1):
 
             # a) Initialize the actual game board (B_a) to an empty board
             self.game.reset(random_start_player=False)
@@ -82,31 +67,15 @@ class RLSystem:
                 if show_game:
                     self.game.display_state(root)
 
+            print(f"g_a: {g_a} | RBUF length: {len(self.rbuf)}")
+
             # e) Train ANet on a random minibatch of cases from RBUF
             states = [t[0] for t in self.rbuf]
             distibutions = [t[1] for t in self.rbuf]
             self.anet.nn.fit(np.array(states), np.array(distibutions))
 
             # f) If g_a is a checkpoint, save the parameters
-            if g_a % (self.num_actual_games // self.checkpoints) == 0:
-                self.anet.nn.save(f"models/model_after_{g_a}")
+            if g_a % (self.num_actual_games // (self.checkpoints - 1)) == 0:
+                self.anet.nn.save(
+                    f"models/model_k4_{g_a}_of_{self.num_actual_games}")
                 print("Checkpoint!")
-
-
-if __name__ == "__main__":
-    k = 3
-    hex = HexGame(k)
-    rls = RLSystem(hex,
-                   anet_lr=0.03,
-                   num_search_games=100,
-                   c=1,
-                   eps=0.1,
-                   num_actual_games=10,
-                   checkpoints=2)
-    rls.rl_algorithm(show_game=False)
-    print(
-        f"State: Black player turn - {rls.anet.nn(np.array([1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]).reshape(1, -1))}"
-    )
-    print(
-        f"State: Black player turn - {rls.anet.nn(np.array([1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]).reshape(1, -1))}"
-    )
