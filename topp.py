@@ -44,7 +44,16 @@ class TOPP:
             while not self.game.game_over():
                 if black_player_turn:
                     distribution = model1(state)
-                    a = np.argmax(distribution)
                 else:
                     distribution = model2(state)
-                    a = np.argmax(distribution)
+
+                a = np.argmax(distribution)
+
+                self.game.play(a)
+
+                black_player_turn = not black_player_turn
+
+            if self.game.black_won:
+                wins_model_1 += 1
+
+        return wins_model_1

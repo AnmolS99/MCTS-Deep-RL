@@ -1,8 +1,5 @@
 import random
 import numpy as np
-from anet import ANet
-
-from nim_game import NimGame
 
 
 class MCTS:
@@ -20,7 +17,7 @@ class MCTS:
         )  # Dictionary tracking visits to states and state-action pairs
         self.Q = dict(
         )  # Dictionary containing evaluation values of state-action pairs
-        self.tree = []  # List of states/nodes in the tree
+        self.tree = set()  # List of states/nodes in the tree
         self.states = []  # List of states visited during a simulation
         self.actions = []  # List of actions performed during a simulation
 
@@ -144,7 +141,7 @@ class MCTS:
         Creating a new node in the tree (expanding)
         """
         # Adding the new state to the tree, thus expanding it
-        self.tree.append(s)
+        self.tree.add(s)
         self.states.append(s)
 
         # Initializing its state visit counter
@@ -237,13 +234,3 @@ def normalize_vector(vector):
     Normalizes a vector (np.array)
     """
     return vector / np.sum(vector)
-
-
-if __name__ == "__main__":
-    n = 10
-    k = 2
-    ng = NimGame(n, k)
-    anet = ANet((n + 2, 50, 50, 50, k), 0.03)
-    anet.nn.summary()
-    mcts = MCTS(ng, anet, 1000, 1)
-    mcts.uct_search(ng.get_position())

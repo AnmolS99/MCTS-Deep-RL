@@ -56,11 +56,11 @@ class HexGame:
         """
         Checks whether the game is over (by cheking whether black or red has won)
         """
-        black_player_won, path = self.check_player_won(0)
+        black_player_won = self.check_player_won(0)
         if black_player_won:
             self.black_won = True
             return True
-        red_player_won, path = self.check_player_won(1)
+        red_player_won = self.check_player_won(1)
         if red_player_won:
             self.black_won = False
             return True
@@ -77,7 +77,7 @@ class HexGame:
         if player == 1:
             board = np.transpose(board, (1, 0, 2))
 
-        discovered = []
+        discovered = set()
 
         # Nodes in the first column where a players piece is placed
         start_nodes = board[:, 0, player]
@@ -85,20 +85,18 @@ class HexGame:
 
         # Doing DFS from all start nodes
         for idx in start_idx:
-            v = np.array([idx, 0, player])
+            v = (idx, 0, player)
 
             # If start node not discovered
-            if not any(
-                    np.array_equal(v, discovered_v)
-                    for discovered_v in discovered):
+            if v not in discovered:
 
                 # Performing DFS from start node v
-                finished, child_v = self.dfs(discovered, v, player, board)
+                finished = self.dfs(discovered, v, player, board)
 
                 # If we have found a path
                 if finished:
-                    return finished, child_v
-        return False, None
+                    return True
+        return False
 
     def dfs(self, discovered, v, player, board):
         """
@@ -107,25 +105,19 @@ class HexGame:
 
         # If we have reached the last column, we have found a path and the game is over
         if v[1] == self.K - 1:
-            if player == 0:
-                return True, v[[0, 1]]
-            else:
-                return True, v[[1, 0]]
+            return True
 
-        discovered.append(v)
+        discovered.add(v)
         for neighbour in self.dfs_neighbours(v, player, board):
-            if not any(
-                    np.array_equal(neighbour, discovered_v)
-                    for discovered_v in discovered):
-                finished, child_v = self.dfs(discovered, neighbour, player,
-                                             board)
-                if finished:
-                    if player == 0:
-                        return finished, np.concatenate((v[[0, 1]], child_v))
-                    else:
-                        return finished, np.concatenate((v[[1, 0]], child_v))
 
-        return False, None
+            if neighbour not in discovered:
+
+                finished = self.dfs(discovered, neighbour, player, board)
+
+                if finished:
+                    return True
+
+        return False
 
     def dfs_neighbours(self, v, player, board):
         """
@@ -134,37 +126,36 @@ class HexGame:
         r = v[0]
         c = v[1]
         board_len = self.K - 1
-        neighbours = []
+        neighbours = set()
 
         # If v not in first row, there is a neighbour above
         if r > 0:
-            neighbours.append(np.array([r - 1, c, player]))
+            neighbours.add((r - 1, c, player))
             # If v not in last column either, there is a neighbour obliquely up to the right
             if c < board_len:
-                neighbours.append(np.array([r - 1, c + 1, player]))
+                neighbours.add((r - 1, c + 1, player))
 
         # If v not in last column, there is a neighbour to the right
         if c < board_len:
-            neighbours.append(np.array([r, c + 1, player]))
+            neighbours.add((r, c + 1, player))
 
         # If v not in last row, there is a neighbour below
         if r < board_len:
-            neighbours.append(np.array([r + 1, c, player]))
+            neighbours.add((r + 1, c, player))
 
             # If v not in first column either, there is a neighbour obliquely down to the left
             if c > 0:
-                neighbours.append(np.array([r + 1, c - 1, player]))
+                neighbours.add((r + 1, c - 1, player))
 
         # If v not in first column, there is a neighbour to the left
         if c > 0:
-            neighbours.append(np.array([r, c - 1, player]))
+            neighbours.add((r, c - 1, player))
 
         # Filter out neighbours that are not 1 on the board
-        neighbours = np.array(neighbours)
-        neighbours_one = []
+        neighbours_one = set()
         for neighbour in neighbours:
-            if board[tuple(neighbour)] == 1:
-                neighbours_one.append(neighbour)
+            if board[neighbour] == 1:
+                neighbours_one.add(neighbour)
         return neighbours_one
 
     def reset(self, random_start_player=False):
