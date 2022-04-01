@@ -29,7 +29,7 @@ class NimGame:
         else:
             raise Exception("Invalid number of pieces to remove")
 
-    def game_over(self):
+    def game_over(self, display_winner=False):
         """
         Checks if the current state is a final state
         """
@@ -124,3 +124,6 @@ class NimGame:
         one_hot_board = one_hot_encoding[1:]
         n = np.where(one_hot_board == 1)[0][0]
         return (black_to_play, n)
+
+    def get_id(self):
+        return "n" + str(self.N_start)

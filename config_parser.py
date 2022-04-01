@@ -42,6 +42,7 @@ class ConfigParser:
         num_search_games = int(self.config["mcts"]["num_search_games"])
         c = float(self.config["mcts"]["c"])
         eps = float(self.config["mcts"]["eps"])
+        eps_delta = float(self.config["mcts"]["eps_delta"])
 
         num_actual_games = int(self.config["rl_system"]["num_actual_games"])
         checkpoints = int(self.config["rl_system"]["checkpoints"])
@@ -51,5 +52,6 @@ class ConfigParser:
                         num_search_games=num_search_games,
                         c=c,
                         eps=eps,
+                        eps_delta=eps_delta,
                         num_actual_games=num_actual_games,
                         checkpoints=checkpoints)

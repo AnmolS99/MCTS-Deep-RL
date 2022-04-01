@@ -15,7 +15,6 @@ class HexGame:
         self.black_to_play_start = black_to_play  # Whether black (player 1) begins the game
         self.black_to_play = black_to_play  # Whose turn it is
         self.board = np.zeros((self.K, self.K, 2))
-        self.black_won = None
 
     def play(self, piece_in_cell_num):
         """
@@ -52,23 +51,25 @@ class HexGame:
         else:
             self.board[tuple(cell)] = np.array([0, 1])
 
-    def game_over(self):
+    def game_over(self, display_winner=False):
         """
         Checks whether the game is over (by cheking whether black or red has won)
         """
         black_player_won = self.check_player_won(0)
         if black_player_won:
-            self.black_won = True
+            if display_winner:
+                print("Black won")
             return True
         red_player_won = self.check_player_won(1)
         if red_player_won:
-            self.black_won = False
+            if display_winner:
+                print("Red won")
             return True
         return False
 
     def check_player_won(self, player):
         """
-        Checking whether a certain player has won
+        Checking whether a certain player has won (0 is black, 1 is red)
         """
         # Copying the current board
         board = deepcopy(self.board)
@@ -163,7 +164,6 @@ class HexGame:
         Resets the game, and (optionally) randomly chooses who begins.
         """
         self.board = np.zeros((self.K, self.K, 2))
-        self.black_won = None
         if random_start_player:
             self.black_to_play = np.random.choice([True, False])
         else:
@@ -218,13 +218,12 @@ class HexGame:
         Returns 1 if black won the game (which would mean that red would play next),
         and -1 if red won
         """
-        if self.black_won == None:
-            raise Exception("No player has won the game.")
+        if self.check_player_won(0):
+            return 1
+        elif self.check_player_won(1):
+            return -1
         else:
-            if self.black_won:
-                return 1
-            else:
-                return -1
+            raise Exception("No player has won")
 
     def one_hot_board(self):
         """
@@ -263,6 +262,12 @@ class HexGame:
         Converting cell coordinates to cell number (f.ex. in 3*3 game, [1, 1] would return 4)
         """
         return (cell[0] * self.K) + cell[1]
+
+    def get_id(self):
+        """
+        Returns an ID of the game
+        """
+        return "k" + str(self.K)
 
     def display_state(self, one_hot_state):
         """
@@ -318,7 +323,7 @@ class HexGame:
 
         nx.draw(graph, pos, node_color=color_list, edgecolors="black")
 
-        plt.show()
+        plt.savefig("game_state.png")
 
 
 if __name__ == "__main__":
