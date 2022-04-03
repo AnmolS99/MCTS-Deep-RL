@@ -1,3 +1,4 @@
+import time
 import tensorflow as tf
 import numpy as np
 from hex_game import HexGame
@@ -28,13 +29,13 @@ class TOPP:
             models[f"player{checkpoint}"] = model
         return models
 
-    def play(self, model1, model2):
+    def play(self, model1, model2, g, display=False):
         """
         Two models playing G games against each other
         """
         wins_model_1 = 0
         wins_model_2 = 0
-        for i in range(self.g):
+        for i in range(g):
 
             # Resetting the board and randomly choosing starting player
             self.game.reset(random_start_player=False)
@@ -43,6 +44,10 @@ class TOPP:
                 self.game.black_to_play = True
             else:
                 self.game.black_to_play = False
+
+            if display:
+                topp.game.display_state(self.game.get_position())
+                time.sleep(1)
 
             # Getting start position
             state = np.array(list(self.game.get_position())).reshape(1, -1)
@@ -73,6 +78,12 @@ class TOPP:
                 self.game.play(a)
 
                 black_player_turn = not black_player_turn
+
+                if display:
+                    topp.game.display_state(self.game.get_position())
+                    time.sleep(1)
+
+                #time.sleep(1)
 
             if self.game.black_wins() == 1:
                 wins_model_1 += 1
@@ -108,12 +119,20 @@ class TOPP:
 
                 rest_model_name, rest_model_nn = rest_model
 
-                print(f"{curr_model_name} plays {rest_model_name}")
-                curr_model_wins, rest_model_wins = self.play(
-                    curr_model_nn, rest_model_nn)
+                # Playing to sets of games, where they switch who plays as black
+                curr_model_wins_1, rest_model_wins_1 = self.play(
+                    curr_model_nn, rest_model_nn, self.g // 2)
 
-                model_wins[curr_model_name] += curr_model_wins
-                model_wins[rest_model_name] += rest_model_wins
+                rest_model_wins_2, curr_model_wins_2 = self.play(
+                    rest_model_nn, curr_model_nn, self.g // 2)
+                print(
+                    f"{curr_model_name} plays {rest_model_name}: result {(curr_model_wins_1 + curr_model_wins_2)} - {(rest_model_wins_1 + rest_model_wins_2)}"
+                )
+
+                model_wins[curr_model_name] += (curr_model_wins_1 +
+                                                curr_model_wins_2)
+                model_wins[rest_model_name] += (rest_model_wins_1 +
+                                                rest_model_wins_2)
 
         return sorted(model_wins.items(), key=lambda x: x[1], reverse=True)
 
@@ -168,8 +187,8 @@ def normalize_vector(vector):
 
 if __name__ == "__main__":
     hex = HexGame(4)
-    topp = TOPP(hex, g=100, k=4, num_actual_games=20, checkpoints=5)
+    topp = TOPP(hex, g=24, k=4, num_actual_games=300, checkpoints=5)
     models = topp.load_models()
-    #print(topp.play(models["player0"], models["player20"]))
-    #print(topp.play_against_model(models["player15"]))
+    #print(topp.play(models["player150"], models["player225"], 4, display=True))
+    #print(topp.play_against_model(models["player300"]))
     print(topp.play_topp())

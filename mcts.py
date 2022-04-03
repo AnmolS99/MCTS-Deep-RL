@@ -7,10 +7,10 @@ class MCTS:
     Monte-Carlo Search Tree algorithm
     """
 
-    def __init__(self, game_board, anet, time_available, c, eps,
+    def __init__(self, game_board, anet_model, time_available, c, eps,
                  eps_delta) -> None:
         self.game_board = game_board  # The game that is being played
-        self.anet = anet  # The actor net used to provide the default policy
+        self.anet_model = anet_model  # The actor net used to provide the default policy
         self.time_available = time_available  # The time available to perform a uct search
         self.c = c  # Constant representing the importance of exploration in the tree policy
         self.eps_start = eps  #   Original epsilon value
@@ -24,12 +24,15 @@ class MCTS:
         self.states = []  # List of states visited during a simulation
         self.actions = []  # List of actions performed during a simulation
 
-    def uct_search(self, s_0):
+    def uct_search(self, s_0, anet_model):
         """
         Running multiple simulations where each simulation creates a new Monte-Carlo Tree.
         Monte-Carlo Search Tree which gives a bonus to actions that haven't been explored that much, thereby 
         following 'optimism in face of uncertainty' principle
         """
+        # Setting ANet to the ANet passed in
+        self.anet_model = anet_model
+
         search_time_available = self.time_available
         # While there is time, simulate different traverses and expansions of the Monte-Carlo Tree
         while search_time_available:
@@ -162,7 +165,7 @@ class MCTS:
         state = np.array(list(self.game_board.get_position())).reshape(1, -1)
 
         # Probability distribution over the all possible actions (including illegal)
-        probs = self.anet.nn(state).numpy()
+        probs = self.anet_model.predict(state)
 
         # Getting indices of all legal actions
         legal_actions_idx = self.game_board.get_legal_actions(
@@ -182,8 +185,6 @@ class MCTS:
             chosen_action = np.random.choice(non_zero_idx)
         else:
             chosen_action = np.argmax(legal_actions)
-        self.eps = self.eps * self.eps_delta
-
         return chosen_action
 
     def argmax_Q_augmented(self, s, possible_actions, c):
@@ -240,7 +241,6 @@ class MCTS:
         self.tree = set()
         self.states = []
         self.actions = []
-        #self.eps = self.eps_start
 
 
 def normalize_vector(vector):

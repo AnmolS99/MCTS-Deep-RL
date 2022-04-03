@@ -1,7 +1,8 @@
 import copy
-import random
 import numpy as np
 from mcts import MCTS
+from lite_model import LiteModel
+import random
 
 
 class RLSystem:
@@ -15,8 +16,11 @@ class RLSystem:
         self.game = game
         self.anet = anet
         self.rbuf = []
-        self.mcts = MCTS(copy.deepcopy(game), self.anet, num_search_games, c,
-                         eps, eps_delta)
+        self.eps = eps
+        self.eps_delta = eps_delta
+        self.mcts = MCTS(copy.deepcopy(game),
+                         LiteModel.from_keras_model(self.anet.nn),
+                         num_search_games, c, eps, eps_delta)
         self.num_actual_games = num_actual_games
         self.checkpoints = checkpoints
 
@@ -27,6 +31,9 @@ class RLSystem:
         )
         print("Checkpoint!")
 
+        # Setting lmodel
+        lmodel = LiteModel.from_keras_model(self.anet.nn)
+
         # 2. Clearing RBUF
         self.rbuf = []
 
@@ -36,7 +43,7 @@ class RLSystem:
         for g_a in range(self.num_actual_games + 1):
 
             # a) Initialize the actual game board (B_a) to an empty board
-            self.game.reset(random_start_player=True)
+            self.game.reset(random_start_player=False)
 
             # b) Get starting board state
             s_init = self.game.get_position()
@@ -53,13 +60,18 @@ class RLSystem:
             while not self.game.game_over(display_winner=True):
 
                 # Initialize Monte Carlo board (B_mc) to same state as root, and play number_search_games
-                distribution = self.mcts.uct_search(root)
+                distribution = self.mcts.uct_search(root, lmodel)
 
                 # Adding case (root, D) to RBUF
                 self.rbuf.append((root, distribution))
 
                 # Chooses actual move based on distribution
-                a_star = np.argmax(distribution)
+                if random.random() < self.eps:
+                    distribution = distribution.reshape(1, -1)
+                    non_zero_idx = np.nonzero(distribution)[1]
+                    a_star = np.random.choice(non_zero_idx)
+                else:
+                    a_star = np.argmax(distribution)
 
                 # Performing a_star to produce s_star
                 self.game.play(a_star)
@@ -78,12 +90,20 @@ class RLSystem:
                 states = [t[0] for t in self.rbuf]
                 distibutions = [t[1] for t in self.rbuf]
             else:
-                rbuf_samples = random.choices(self.rbuf, k=1024)
+                rbuf_samples_idx = np.random.choice(a=len(self.rbuf),
+                                                    size=1024,
+                                                    replace=False)
+                rbuf_samples = np.array(self.rbuf,
+                                        dtype=object)[rbuf_samples_idx]
                 states = [t[0] for t in rbuf_samples]
                 distibutions = [t[1] for t in rbuf_samples]
+
             self.anet.nn.fit(np.array(states),
                              np.array(distibutions),
-                             epochs=64)
+                             epochs=100)
+
+            # Creating lmodel
+            lmodel = LiteModel.from_keras_model(self.anet.nn)
 
             # f) If g_a is a checkpoint, save the parameters
             if g_a % (self.num_actual_games // (self.checkpoints - 1)) == 0:
