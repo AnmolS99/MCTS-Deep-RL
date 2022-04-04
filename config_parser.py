@@ -41,17 +41,23 @@ class ConfigParser:
 
         num_search_games = int(self.config["mcts"]["num_search_games"])
         c = float(self.config["mcts"]["c"])
-        eps = float(self.config["mcts"]["eps"])
-        eps_delta = float(self.config["mcts"]["eps_delta"])
+        eps_mcts = float(self.config["mcts"]["eps_mcts"])
+        eps_rl = float(self.config["mcts"]["eps_rl"])
+        eps_rl_delta = float(self.config["mcts"]["eps_rl_delta"])
 
         num_actual_games = int(self.config["rl_system"]["num_actual_games"])
         checkpoints = int(self.config["rl_system"]["checkpoints"])
+        rbuf = int(self.config["rl_system"]["rbuf"])
+        epochs = int(self.config["rl_system"]["epochs"])
 
         return RLSystem(game=hex_game,
                         anet=anet,
                         num_search_games=num_search_games,
                         c=c,
-                        eps=eps,
-                        eps_delta=eps_delta,
+                        eps_rl=eps_rl,
+                        eps_rl_delta=eps_rl_delta,
+                        eps_mcts=eps_mcts,
                         num_actual_games=num_actual_games,
-                        checkpoints=checkpoints)
+                        checkpoints=checkpoints,
+                        rbuf_size=rbuf,
+                        epochs=epochs)

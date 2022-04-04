@@ -83,8 +83,6 @@ class TOPP:
                     topp.game.display_state(self.game.get_position())
                     time.sleep(1)
 
-                #time.sleep(1)
-
             if self.game.black_wins() == 1:
                 wins_model_1 += 1
             else:
@@ -134,7 +132,7 @@ class TOPP:
                 model_wins[rest_model_name] += (rest_model_wins_1 +
                                                 rest_model_wins_2)
 
-        return sorted(model_wins.items(), key=lambda x: x[1], reverse=True)
+        return model_wins
 
     def play_against_model(self, model):
         # Resetting the board and randomly choosing starting player
@@ -186,9 +184,9 @@ def normalize_vector(vector):
 
 
 if __name__ == "__main__":
-    hex = HexGame(4)
-    topp = TOPP(hex, g=24, k=4, num_actual_games=300, checkpoints=5)
-    models = topp.load_models()
-    #print(topp.play(models["player150"], models["player225"], 4, display=True))
-    #print(topp.play_against_model(models["player300"]))
-    print(topp.play_topp())
+    hex = HexGame(7)
+    topp = TOPP(hex, g=4, k=7, num_actual_games=400, checkpoints=5)
+    #models = topp.load_models()
+    #print(topp.play(models["player200"], models["player400"], 4, display=True))
+    #print(topp.play_against_model(models["player20"]))
+    #print(topp.play_topp())

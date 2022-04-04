@@ -321,7 +321,11 @@ class HexGame:
             else:
                 color_list.append("white")
 
-        nx.draw(graph, pos, node_color=color_list, edgecolors="black")
+        nx.draw(graph,
+                pos,
+                node_color=color_list,
+                edgecolors="black",
+                with_labels=True)
 
         plt.savefig("game_state.png")
 

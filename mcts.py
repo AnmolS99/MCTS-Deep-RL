@@ -7,15 +7,12 @@ class MCTS:
     Monte-Carlo Search Tree algorithm
     """
 
-    def __init__(self, game_board, anet_model, time_available, c, eps,
-                 eps_delta) -> None:
+    def __init__(self, game_board, anet_model, time_available, c, eps) -> None:
         self.game_board = game_board  # The game that is being played
         self.anet_model = anet_model  # The actor net used to provide the default policy
         self.time_available = time_available  # The time available to perform a uct search
         self.c = c  # Constant representing the importance of exploration in the tree policy
-        self.eps_start = eps  #   Original epsilon value
         self.eps = eps  #   Epsilon value, probability of choosing random action during rollout, thus representing how exploratory the default policy is
-        self.eps_delta = eps_delta  #   Epsilon delta, how much delta should decrease
         self.N = dict(
         )  # Dictionary tracking visits to states and state-action pairs
         self.Q = dict(
@@ -241,6 +238,8 @@ class MCTS:
         self.tree = set()
         self.states = []
         self.actions = []
+        self.N = []
+        self.Q = []
 
 
 def normalize_vector(vector):
