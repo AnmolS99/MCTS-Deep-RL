@@ -238,8 +238,8 @@ class MCTS:
         self.tree = set()
         self.states = []
         self.actions = []
-        self.N = []
-        self.Q = []
+        self.N = dict()
+        self.Q = dict()
 
 
 def normalize_vector(vector):

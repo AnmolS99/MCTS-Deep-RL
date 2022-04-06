@@ -1,6 +1,4 @@
-import copy
 import numpy as np
-from mcts import MCTS
 from lite_model import LiteModel
 import random
 
@@ -11,37 +9,32 @@ class RLSystem:
     where one move in an actual game is based on multiple MCTS simulations
     """
 
-    def __init__(self, game, anet, num_search_games, c, eps_rl, eps_rl_delta,
-                 eps_mcts, num_actual_games, checkpoints, rbuf_size,
-                 epochs) -> None:
+    def __init__(self, game, anet, mcts, eps_rl, num_actual_games, checkpoints,
+                 rbuf_size, epochs) -> None:
         self.game = game
         self.anet = anet
         self.rbuf = []
         self.eps = eps_rl
-        self.eps_delta = eps_rl_delta
-        self.mcts = MCTS(copy.deepcopy(game),
-                         LiteModel.from_keras_model(self.anet.nn),
-                         num_search_games, c, eps_mcts)
+        self.mcts = mcts
         self.num_actual_games = num_actual_games
         self.checkpoints = checkpoints
         self.rbuf_size = rbuf_size
         self.epochs = epochs
 
     def rl_algorithm(self, show_game=False):
-        # 1. Need to save anet params (for untrained network)
-        self.anet.nn.save(
-            f"models/model_{self.game.get_id()}_{0}_of_{self.num_actual_games}"
-        )
-        print("Checkpoint!")
+        # 1. Need to save anet params (for untrained network) if we have any checkpoints
+        if self.checkpoints > 0:
+            self.anet.nn.save(
+                f"models/model_{self.game.get_id()}_{0}_of_{self.num_actual_games}"
+            )
 
-        # Setting lmodel
+        # Creating lmodel
         lmodel = LiteModel.from_keras_model(self.anet.nn)
 
         # 2. Clearing RBUF
         self.rbuf = []
 
-        # 3. Randomly initialize params for anet
-
+        # 3. Randomly initialize params for anet (happens when the ANet is created)
         # 4. Iterate over number of actual games
         for g_a in range(self.num_actual_games + 1):
 
@@ -57,10 +50,8 @@ class RLSystem:
 
             # Showing the initial game state
             if show_game:
-                self.game.display_state(root)
-
-            # Decreasing epsilon
-            #self.eps = self.eps * self.eps_delta
+                self.game.display_state(root,
+                                        info=f"Training: Game {g_a} start")
 
             # d) While B_a not in a final state
             while not self.game.game_over(display_winner=True):
@@ -87,23 +78,30 @@ class RLSystem:
 
                 # Showing game state
                 if show_game:
-                    self.game.display_state(root)
+                    self.game.display_state(root, info=f"Training: Game {g_a}")
 
             print(f"g_a: {g_a} | RBUF length: {len(self.rbuf)}")
 
-            # e) Train ANet on a random minibatch of cases from RBUF
-            if len(self.rbuf) <= self.rbuf_size:
-                states = [t[0] for t in self.rbuf]
-                distibutions = [t[1] for t in self.rbuf]
-            else:
-                rbuf_samples_idx = np.random.choice(a=len(self.rbuf),
-                                                    size=self.rbuf_size,
-                                                    replace=False)
-                rbuf_samples = np.array(self.rbuf,
-                                        dtype=object)[rbuf_samples_idx]
-                states = [t[0] for t in rbuf_samples]
-                distibutions = [t[1] for t in rbuf_samples]
+            if len(self.rbuf) > self.rbuf_size:
+                self.rbuf = self.rbuf[-self.rbuf_size:]
 
+            states = [t[0] for t in self.rbuf]
+            distibutions = [t[1] for t in self.rbuf]
+
+            # e) Train ANet on a random minibatch of cases from RBUF
+            # if len(self.rbuf) <= self.rbuf_size:
+            #     states = [t[0] for t in self.rbuf]
+            #     distibutions = [t[1] for t in self.rbuf]
+            # else:
+            #     rbuf_samples_idx = np.random.choice(a=len(self.rbuf),
+            #                                         size=self.rbuf_size,
+            #                                         replace=False)
+            #     rbuf_samples = np.array(self.rbuf,
+            #                             dtype=object)[rbuf_samples_idx]
+            #     states = [t[0] for t in rbuf_samples]
+            #     distibutions = [t[1] for t in rbuf_samples]
+
+            # Training the actor network
             self.anet.nn.fit(np.array(states),
                              np.array(distibutions),
                              epochs=self.epochs)
@@ -112,8 +110,8 @@ class RLSystem:
             lmodel = LiteModel.from_keras_model(self.anet.nn)
 
             # f) If g_a is a checkpoint, save the parameters
-            if g_a % (self.num_actual_games // (self.checkpoints - 1)) == 0:
+            if self.checkpoints > 1 and g_a % (self.num_actual_games //
+                                               (self.checkpoints - 1)) == 0:
                 self.anet.nn.save(
                     f"models/model_{self.game.get_id()}_{g_a}_of_{self.num_actual_games}"
                 )
-                print("Checkpoint!")

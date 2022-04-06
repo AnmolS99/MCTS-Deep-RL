@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from hex_game import HexGame
+from lite_model import LiteModel
 
 
 class HexActor():
@@ -8,7 +9,8 @@ class HexActor():
     def __init__(self, k, model_path) -> None:
         self.k = k
         self.game_board = HexGame(K=self.k)
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = lmodel = LiteModel.from_keras_model(
+            tf.keras.models.load_model(model_path))
 
     def get_action(self, state):
         # Preprocessing state
@@ -19,7 +21,7 @@ class HexActor():
         parsed_state_tuple = tuple(parsed_state[0])
 
         # Sending it through model
-        probs = self.model(parsed_state).numpy()
+        probs = self.model.predict(parsed_state)
 
         # Getting indices of all legal actions
         legal_actions_idx = self.game_board.get_legal_actions(
@@ -32,6 +34,11 @@ class HexActor():
         legal_actions = np.zeros_like(probs)
 
         legal_actions[:, legal_actions_idx] = legal_actions_probs
+
+        legal_actions = legal_actions.flatten()
+
+        # a = np.random.choice(range(len(legal_actions)), p=legal_actions)
+
         a = np.argmax(legal_actions)
 
         # Postprocess action

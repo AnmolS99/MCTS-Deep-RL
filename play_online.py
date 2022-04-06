@@ -2,7 +2,7 @@
 from ActorClient import ActorClient
 from hex_actor import HexActor
 
-actor = HexActor(k=7, model_path="models/model_k7_100_of_400")
+actor = HexActor(k=7, model_path="models/model_k7_300_of_400")
 
 
 class MyClient(ActorClient):

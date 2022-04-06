@@ -269,7 +269,7 @@ class HexGame:
         """
         return "k" + str(self.K)
 
-    def display_state(self, one_hot_state):
+    def display_state(self, one_hot_state, info=""):
         """
         Uses graphics to display a state of a Hex game
         """
@@ -277,6 +277,7 @@ class HexGame:
         black_to_play = state[0]
         board = state[1]
         player = "Black" if black_to_play else "Red"
+        plt.suptitle(info)
         plt.title(f"{player} players turn to play")
 
         graph = nx.Graph()

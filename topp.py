@@ -2,6 +2,9 @@ import time
 import tensorflow as tf
 import numpy as np
 from hex_game import HexGame
+import matplotlib.pyplot as plt
+
+from lite_model import LiteModel
 
 
 class TOPP:
@@ -9,8 +12,8 @@ class TOPP:
     Tournament Of Progressive Policies
     """
 
-    def __init__(self, game, g, k, num_actual_games, checkpoints) -> None:
-        self.game = game
+    def __init__(self, g, k, num_actual_games, checkpoints) -> None:
+        self.game = HexGame(K=k)
         self.g = g
         self.k = k
         self.num_actual_games = num_actual_games
@@ -26,10 +29,21 @@ class TOPP:
             model = tf.keras.models.load_model(
                 f"models/model_k{self.k}_{checkpoint}_of_{self.num_actual_games}"
             )
-            models[f"player{checkpoint}"] = model
+            # Creating Litemodel
+            lmodel = LiteModel.from_keras_model(model)
+
+            # Saving the lmodel to dictionary
+            models[f"player{checkpoint}"] = lmodel
         return models
 
-    def play(self, model1, model2, g, display=False):
+    def play(self,
+             model1,
+             model2,
+             g,
+             model1_name="Model1",
+             model2_name="Model2",
+             display=False,
+             delay=1):
         """
         Two models playing G games against each other
         """
@@ -46,19 +60,21 @@ class TOPP:
                 self.game.black_to_play = False
 
             if display:
-                topp.game.display_state(self.game.get_position())
-                time.sleep(1)
+                self.game.display_state(
+                    self.game.get_position(),
+                    info=f"{model1_name} vs. {model2_name} - Game {i+1}")
+                time.sleep(delay)
 
             # Getting start position
             state = np.array(list(self.game.get_position())).reshape(1, -1)
 
             black_player_turn = self.game.black_to_play
 
-            while not self.game.game_over():
+            while not self.game.game_over(display_winner=True):
                 if black_player_turn:
-                    probs = model1(state).numpy()
+                    probs = model1.predict(state)
                 else:
-                    probs = model2(state).numpy()
+                    probs = model2.predict(state)
 
                 # Getting indices of all legal actions
                 legal_actions_idx = self.game.get_legal_actions(
@@ -73,6 +89,8 @@ class TOPP:
 
                 legal_actions[:, legal_actions_idx] = legal_actions_probs
 
+                legal_actions = legal_actions.flatten()
+
                 a = np.argmax(legal_actions)
 
                 self.game.play(a)
@@ -80,8 +98,10 @@ class TOPP:
                 black_player_turn = not black_player_turn
 
                 if display:
-                    topp.game.display_state(self.game.get_position())
-                    time.sleep(1)
+                    self.game.display_state(
+                        self.game.get_position(),
+                        info=f"{model1_name} vs. {model2_name} - Game {i+1}")
+                    time.sleep(delay)
 
             if self.game.black_wins() == 1:
                 wins_model_1 += 1
@@ -90,7 +110,7 @@ class TOPP:
 
         return wins_model_1, wins_model_2
 
-    def play_topp(self):
+    def play_topp(self, show_game=False, delay=1):
         """
         Playing TOPP Tournament between all players
         """
@@ -118,19 +138,32 @@ class TOPP:
                 rest_model_name, rest_model_nn = rest_model
 
                 # Playing to sets of games, where they switch who plays as black
-                curr_model_wins_1, rest_model_wins_1 = self.play(
-                    curr_model_nn, rest_model_nn, self.g // 2)
+                curr_model_wins, rest_model_wins = self.play(
+                    curr_model_nn,
+                    rest_model_nn,
+                    self.g,
+                    model1_name=curr_model_name,
+                    model2_name=rest_model_name,
+                    display=show_game,
+                    delay=delay)
 
-                rest_model_wins_2, curr_model_wins_2 = self.play(
-                    rest_model_nn, curr_model_nn, self.g // 2)
                 print(
-                    f"{curr_model_name} plays {rest_model_name}: result {(curr_model_wins_1 + curr_model_wins_2)} - {(rest_model_wins_1 + rest_model_wins_2)}"
+                    f"{curr_model_name} plays {rest_model_name}: result {curr_model_wins} - {rest_model_wins}"
                 )
 
-                model_wins[curr_model_name] += (curr_model_wins_1 +
-                                                curr_model_wins_2)
-                model_wins[rest_model_name] += (rest_model_wins_1 +
-                                                rest_model_wins_2)
+                model_wins[curr_model_name] += curr_model_wins
+                model_wins[rest_model_name] += rest_model_wins
+
+        # Plotting the results
+        lists = model_wins.items()
+        players, wins = zip(*lists)
+        players = [x.replace("player", "") for x in players]
+        fig = plt.figure()
+        plt.xlabel("No. episodes Actor has trained")
+        plt.ylabel("Wins")
+        plt.title("TOPP results")
+        plt.bar(players, wins)
+        plt.show()
 
         return model_wins
 
@@ -144,10 +177,10 @@ class TOPP:
         black_player_turn = self.game.black_to_play
 
         while not self.game.game_over():
-            topp.game.display_state(self.game.get_position())
+            self.game.display_state(self.game.get_position())
 
             if black_player_turn:
-                probs = model(state).numpy()
+                probs = model.predict(state)
                 # Getting indices of all legal actions
                 legal_actions_idx = self.game.get_legal_actions(
                     self.game.get_position())
@@ -169,7 +202,7 @@ class TOPP:
 
             black_player_turn = not black_player_turn
 
-        topp.game.display_state(self.game.get_position())
+        self.game.display_state(self.game.get_position())
         if self.game.black_wins() == 1:
             return "Black player (player 1) WON"
         else:
@@ -181,12 +214,3 @@ def normalize_vector(vector):
     Normalizes a vector (np.array)
     """
     return vector / np.sum(vector)
-
-
-if __name__ == "__main__":
-    hex = HexGame(7)
-    topp = TOPP(hex, g=4, k=7, num_actual_games=400, checkpoints=5)
-    #models = topp.load_models()
-    #print(topp.play(models["player200"], models["player400"], 4, display=True))
-    #print(topp.play_against_model(models["player20"]))
-    #print(topp.play_topp())

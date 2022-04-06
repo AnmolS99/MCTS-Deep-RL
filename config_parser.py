@@ -1,7 +1,10 @@
 import configparser
+import copy
 from anet import ANet
 
 from hex_game import HexGame
+from lite_model import LiteModel
+from mcts import MCTS
 from rl_system import RLSystem
 
 
@@ -39,24 +42,25 @@ class ConfigParser:
         layers.append(output_nodes)
         anet = ANet(layers, lr, optimizer)
 
+        # Creating MCTS
         num_search_games = int(self.config["mcts"]["num_search_games"])
         c = float(self.config["mcts"]["c"])
         eps_mcts = float(self.config["mcts"]["eps_mcts"])
-        eps_rl = float(self.config["mcts"]["eps_rl"])
-        eps_rl_delta = float(self.config["mcts"]["eps_rl_delta"])
+        mcts = MCTS(copy.deepcopy(hex_game),
+                    LiteModel.from_keras_model(anet.nn), num_search_games, c,
+                    eps_mcts)
 
+        # Parsing RL variables
         num_actual_games = int(self.config["rl_system"]["num_actual_games"])
         checkpoints = int(self.config["rl_system"]["checkpoints"])
         rbuf = int(self.config["rl_system"]["rbuf"])
         epochs = int(self.config["rl_system"]["epochs"])
+        eps_rl = float(self.config["rl_system"]["eps_rl"])
 
         return RLSystem(game=hex_game,
                         anet=anet,
-                        num_search_games=num_search_games,
-                        c=c,
+                        mcts=mcts,
                         eps_rl=eps_rl,
-                        eps_rl_delta=eps_rl_delta,
-                        eps_mcts=eps_mcts,
                         num_actual_games=num_actual_games,
                         checkpoints=checkpoints,
                         rbuf_size=rbuf,
