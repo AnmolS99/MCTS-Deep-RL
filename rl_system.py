@@ -82,24 +82,12 @@ class RLSystem:
 
             print(f"g_a: {g_a} | RBUF length: {len(self.rbuf)}")
 
+            # e) Train ANet on the latest cases in the RBUF, could also use a random minibatch from all cases
             if len(self.rbuf) > self.rbuf_size:
                 self.rbuf = self.rbuf[-self.rbuf_size:]
 
             states = [t[0] for t in self.rbuf]
             distibutions = [t[1] for t in self.rbuf]
-
-            # e) Train ANet on a random minibatch of cases from RBUF
-            # if len(self.rbuf) <= self.rbuf_size:
-            #     states = [t[0] for t in self.rbuf]
-            #     distibutions = [t[1] for t in self.rbuf]
-            # else:
-            #     rbuf_samples_idx = np.random.choice(a=len(self.rbuf),
-            #                                         size=self.rbuf_size,
-            #                                         replace=False)
-            #     rbuf_samples = np.array(self.rbuf,
-            #                             dtype=object)[rbuf_samples_idx]
-            #     states = [t[0] for t in rbuf_samples]
-            #     distibutions = [t[1] for t in rbuf_samples]
 
             # Training the actor network
             self.anet.nn.fit(np.array(states),

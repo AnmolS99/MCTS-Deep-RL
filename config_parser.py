@@ -6,6 +6,7 @@ from hex_game import HexGame
 from lite_model import LiteModel
 from mcts import MCTS
 from rl_system import RLSystem
+from topp import TOPP
 
 
 class ConfigParser:
@@ -18,7 +19,7 @@ class ConfigParser:
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
 
-    def create_rl_system(self):
+    def create_rls_topp(self):
         """
         Creates the RL System along with ANet, MCTS and Hex game
         """
@@ -35,7 +36,7 @@ class ConfigParser:
         input_nodes = hex_game.get_input_dim()
         output_nodes = hex_game.get_output_dim()
         layers = [input_nodes]
-        for section in self.config.sections()[4:]:
+        for section in self.config.sections()[5:]:
             neurons = int(self.config[section]["n"])
             act_func = self.config[section]["act"]
             layers.append((neurons, act_func))
@@ -50,18 +51,26 @@ class ConfigParser:
                     LiteModel.from_keras_model(anet.nn), num_search_games, c,
                     eps_mcts)
 
-        # Parsing RL variables
+        # Parsing RL variables and creating RLSystem
         num_actual_games = int(self.config["rl_system"]["num_actual_games"])
         checkpoints = int(self.config["rl_system"]["checkpoints"])
         rbuf = int(self.config["rl_system"]["rbuf"])
         epochs = int(self.config["rl_system"]["epochs"])
         eps_rl = float(self.config["rl_system"]["eps_rl"])
+        rls = RLSystem(game=hex_game,
+                       anet=anet,
+                       mcts=mcts,
+                       eps_rl=eps_rl,
+                       num_actual_games=num_actual_games,
+                       checkpoints=checkpoints,
+                       rbuf_size=rbuf,
+                       epochs=epochs)
 
-        return RLSystem(game=hex_game,
-                        anet=anet,
-                        mcts=mcts,
-                        eps_rl=eps_rl,
-                        num_actual_games=num_actual_games,
-                        checkpoints=checkpoints,
-                        rbuf_size=rbuf,
-                        epochs=epochs)
+        # Creating TOPP
+        games = int(self.config["topp"]["games"])
+        topp = TOPP(g=games,
+                    k=k,
+                    num_actual_games=num_actual_games,
+                    checkpoints=checkpoints)
+
+        return rls, topp
