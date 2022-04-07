@@ -22,6 +22,9 @@ class RLSystem:
         self.epochs = epochs
 
     def rl_algorithm(self, show_game=False):
+        """
+        RL algorithm
+        """
         # 1. Need to save anet params (for untrained network) if we have any checkpoints
         if self.checkpoints > 0:
             self.anet.nn.save(

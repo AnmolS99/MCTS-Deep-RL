@@ -213,6 +213,9 @@ class MCTS:
         return lowest_result_action
 
     def get_distribution(self, s_0):
+        """
+        Getting the distribution of "visits" to the different state-action pairs (s_0, a)
+        """
         # Getting all legal actions from s_0
         legal_actions = self.game_board.get_legal_actions(s_0)
 

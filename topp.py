@@ -70,7 +70,7 @@ class TOPP:
 
             black_player_turn = self.game.black_to_play
 
-            while not self.game.game_over(display_winner=True):
+            while not self.game.game_over():
                 if black_player_turn:
                     probs = model1.predict(state)
                 else:
