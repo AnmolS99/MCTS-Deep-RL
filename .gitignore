@@ -6,3 +6,4 @@ server.crt
 api_token.txt
 play_online.py
 ActorClient.py
+hex_actor.py
