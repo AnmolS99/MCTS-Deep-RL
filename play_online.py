@@ -14,5 +14,5 @@ class MyClient(ActorClient):
 
 # Initialize and run your overridden client when the script is executed
 if __name__ == '__main__':
-    client = MyClient(auth="aa5c0269e3254d9a95675779c36852ef", qualify=False)
+    client = MyClient(auth="aa5c0269e3254d9a95675779c36852ef", qualify=True)
     client.run()
