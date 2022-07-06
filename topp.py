@@ -114,56 +114,9 @@ class TOPP:
         """
         Playing TOPP Tournament between all players
         """
-        model0_400 = tf.keras.models.load_model("models/model_k7_0_of_400")
-        model50_400 = tf.keras.models.load_model("models/model_k7_50_of_400")
-        model100_400 = tf.keras.models.load_model("models/model_k7_100_of_400")
-        model100_400f = tf.keras.models.load_model(
-            "models/model_k7_100_of_400_first")
-        model150_400 = tf.keras.models.load_model("models/model_k7_150_of_400")
-        model200_400 = tf.keras.models.load_model("models/model_k7_200_of_400")
-        model250_400 = tf.keras.models.load_model("models/model_k7_250_of_400")
-        model300_400 = tf.keras.models.load_model("models/model_k7_300_of_400")
-        model300s_400 = tf.keras.models.load_model(
-            "models/model_k7_300s_of_400")
-        model350_400 = tf.keras.models.load_model("models/model_k7_350_of_400")
-        model400_400 = tf.keras.models.load_model("models/model_k7_400_of_400")
-        model0_500 = tf.keras.models.load_model("models/model_k7_0_of_500")
-        model50_500 = tf.keras.models.load_model("models/model_k7_50_of_500")
-        model100_500 = tf.keras.models.load_model("models/model_k7_100_of_500")
-        model150_500 = tf.keras.models.load_model("models/model_k7_150_of_500")
-        model200_500 = tf.keras.models.load_model("models/model_k7_200_of_500")
-        model250_500 = tf.keras.models.load_model("models/model_k7_250_of_500")
-        model300_500 = tf.keras.models.load_model("models/model_k7_300_of_500")
-        model350_500 = tf.keras.models.load_model("models/model_k7_350_of_500")
-        model400_500 = tf.keras.models.load_model("models/model_k7_400_of_500")
-        model450_500 = tf.keras.models.load_model("models/model_k7_450_of_500")
-        model500_500 = tf.keras.models.load_model("models/model_k7_500_of_500")
-        models_dict = {
-            "model0_400": model0_400,
-            "model50_400": model50_400,
-            "model100_400": model100_400,
-            "model100_400f": model100_400f,
-            "model150_400": model150_400,
-            "model200_400": model200_400,
-            "model250_400": model250_400,
-            "model300_400": model300_400,
-            "model300s_400": model300s_400,
-            "model350_400": model350_400,
-            "model400_400": model400_400,
-            "model0_500": model0_500,
-            "model50_500": model50_500,
-            "model100_500": model100_500,
-            "model150_500": model150_500,
-            "model200_500": model200_500,
-            "model250_500": model250_500,
-            "model300_500": model300_500,
-            "model350_500": model350_500,
-            "model400_500": model400_500,
-            "model450_500": model450_500,
-            "model500_500": model500_500
-        }
         # Getting dictionary of models
-        #models_dict = self.load_models()
+        models_dict = self.load_models()
+
         # Instantiating a new dictionary counting model wins
         model_wins = dict()
         for model_name in models_dict.keys():
@@ -262,8 +215,3 @@ def normalize_vector(vector):
     Normalizes a vector (np.array)
     """
     return vector / np.sum(vector)
-
-
-if __name__ == "__main__":
-    topp = TOPP(2, 7, 500, 11)
-    topp.play_topp()

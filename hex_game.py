@@ -329,11 +329,3 @@ class HexGame:
                 with_labels=True)
 
         plt.savefig("game_state.png")
-
-
-if __name__ == "__main__":
-    h = HexGame(3)
-    h.set_position(
-        (1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0))
-    h.display_state(
-        (1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0))
