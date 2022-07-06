@@ -22,16 +22,19 @@ in an episode will be based upon hundreds or thousands of search games in the MC
 3. Updating the target policy via supervised learning, where training cases stem from visit counts of arcs in the
 MC tree.
 
-An overview of supervised learning of the target policy network based on results of Monte Carlo Tree Search
+Below is an overview of supervised learning of the target policy network based on results of Monte Carlo Tree Search
 (MCTS):
 
+<img src="images/rl_overview.png" alt="drawing" width="600"/>
 
 Numbers on MCTS branches denote visit counts accrued during the multiple search games associated with
 each single move in the actual game. Each case (yellow box) is stored in the Replay Buffer and used for training at the
-end of each episode; an episode involving m moves should add m cases to the Replay Buffer. PID = Player Identifier.
+end of each episode; an episode involving m moves adds m cases to the Replay Buffer. PID = Player Identifier.
 
 ## Hex ♦️
 
 Hex, also known as Con-tac-tix, is played on a diamond-shaped grid with hexagonal connectivity. Two players (black and red) alternate placing single pieces on the grid. Placed pieces can never be moved or removed. Each player ”owns” two opposite sides of the diamond and attempts to build a connected chain of pieces between those two sides; the first player to do so wins. It can be proven mathematically that ties are not possible: a filled Hex board always contains at least one chain between opposite sides. In this project, red owns the northwest and southeast sides, while black owns the northeast and southwest sides. An example game, where red player wins, is shown below:
 
 <img src="images/hex.gif" alt="drawing" width="600"/>
+
+# Configuration files ⚙️
