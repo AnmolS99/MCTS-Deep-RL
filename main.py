@@ -12,4 +12,4 @@ def main(training, play_topp, show_game=False, delay=0.1):
 
 if __name__ == "__main__":
     # Remember to set "training" to False when showing long run results
-    main(training=False, play_topp=True, show_game=False, delay=0.01)
+    main(training=False, play_topp=True, show_game=True, delay=1)

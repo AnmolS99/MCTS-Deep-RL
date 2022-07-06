@@ -1,5 +1,6 @@
 from copy import deepcopy
 import random
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -327,5 +328,5 @@ class HexGame:
                 node_color=color_list,
                 edgecolors="black",
                 with_labels=True)
-
+        plt.savefig(f"images/game_state_{time.time()}.png")
         plt.savefig("game_state.png")
