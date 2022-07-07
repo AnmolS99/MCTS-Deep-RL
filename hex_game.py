@@ -328,5 +328,4 @@ class HexGame:
                 node_color=color_list,
                 edgecolors="black",
                 with_labels=True)
-        plt.savefig(f"images/game_state_{time.time()}.png")
         plt.savefig("game_state.png")
