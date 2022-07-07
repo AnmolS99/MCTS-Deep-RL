@@ -33,8 +33,15 @@ end of each episode; an episode involving m moves adds m cases to the Replay Buf
 
 ## Hex ♦️
 
-Hex, also known as Con-tac-tix, is played on a diamond-shaped grid with hexagonal connectivity. Two players (black and red) alternate placing single pieces on the grid. Placed pieces can never be moved or removed. Each player ”owns” two opposite sides of the diamond and attempts to build a connected chain of pieces between those two sides; the first player to do so wins. It can be proven mathematically that ties are not possible: a filled Hex board always contains at least one chain between opposite sides. In this project, red owns the northwest and southeast sides, while black owns the northeast and southwest sides. An example game, where red player wins, is shown below:
+Hex, also known as Con-tac-tix, is played on a diamond-shaped grid with hexagonal connectivity. Two players (black and red) alternate placing single pieces on the grid. Placed pieces can never be moved or removed. Each player ”owns” two opposite sides of the diamond and attempts to build a connected chain of pieces between those two sides; the first player to do so wins. It can be proven mathematically that ties are not possible: a filled Hex board always contains at least one chain between opposite sides. In this project, red owns the northwest and southeast sides, while black owns the northeast and southwest sides. An example game of 5x5 Hex, where red player wins, is shown below:
 
 <img src="images/hex.gif" alt="drawing" width="600"/>
 
-# Configuration files ⚙️
+## TOPP (Tournament of Progressive Policies)
+
+In order to measure the improvement of the target policy over time, the current state (i.e weights, biases, etc.) of the ANET is periodically saved to a file. By doing this M times during one complete run of the algorithm, M different policies will be produced. For example, if we train for a total of 200 episodes with M=5, we will have ANETs trained for 0, 50, 100, 150 and 200 episodes. The saved policies can then be reloaded into M different agents whose relative Hex skills can be assessed by a simple tournament. This will has a round-robin format: every agent plays every other agent in one series of G games. For example, if M = 5 and G = 25, then there will be 5 * 4 2 = 10 different series, each involving 25 games.
+
+## Configuration files ⚙️
+
+It is possible to configure Hex, MCTS, RL system, TOPP and ANet parameters in the config files. The config files are located in the [configs](/configs/) folder.
+
