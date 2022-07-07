@@ -45,3 +45,26 @@ In order to measure the improvement of the target policy over time, the current 
 
 It is possible to configure Hex, MCTS, RL system, TOPP and ANet parameters in the config files. The config files are located in the [configs](/configs/) folder.
 
+## Installation 📦
+
+To install the required packages, use the following command: `pip install -r requirements.txt`
+
+## Running a model
+
+To train/run TOPP, the model architecture, Hex game, etc. needs to be specified. This is done in a [configuration file](#configuration-files). You could either modify an existing config file, or create your own config file and specify the path to it in the `main()` function in the `main.py` file. To create, train and test the model in TOPP, run the main.py file: `python main.py`. To skip training, set `training=False` in the main method.
+
+## Results ✅
+
+Below is a run of TOPP on 5x5 Hex, with models trained up to 200 episodes:
+
+<img src="images/hex_5_topp.png" alt="drawing" width="600"/>
+
+As seen in the plot, there is a correlation between the number of episodes a model has trained for and how many wins it has.
+
+## Future work 🚀
+
+Future work on this project could include:
+
+* **Play other games**: In this project, the MCTS approach was tested on Hex and Nim, but it would be interesting to see how well this approach works with other two-player games. One should keep in mind that game complexity could increase the number of possible moves in each state and the resources needed to calculate them, which in turn would affect the time and resources (like computing power and memory) needed to train the models. Games with simple rules and relatively few possible game states would therefore be preferable.
+
+* **Optimize code**: Training can take a long time, and optimizing the MCTS, RL and Hex code could help speed this up. There has already been an optimization of the ANet by using LiteModel from TensorFlow.
