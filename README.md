@@ -39,7 +39,7 @@ Hex, also known as Con-tac-tix, is played on a diamond-shaped grid with hexagona
 
 ## TOPP (Tournament of Progressive Policies)
 
-In order to measure the improvement of the target policy over time, the current state (i.e weights, biases, etc.) of the ANET is periodically saved to a file. By doing this M times during one complete run of the algorithm, M different policies will be produced. For example, if we train for a total of 200 episodes with M=5, we will have ANETs trained for 0, 50, 100, 150 and 200 episodes. The saved policies can then be reloaded into M different agents whose relative Hex skills can be assessed by a simple tournament. This will has a round-robin format: every agent plays every other agent in one series of G games. For example, if M = 5 and G = 25, then there will be 5 * 4 2 = 10 different series, each involving 25 games.
+In order to measure the improvement of the target policy over time, the current state (i.e weights, biases, etc.) of the ANET is periodically saved to a file. By doing this M times during one complete run of the algorithm, M different policies will be produced. For example, if we train for a total of 200 episodes with M=5, we will have ANETs trained for 0, 50, 100, 150 and 200 episodes. The saved policies can then be reloaded into M different agents whose relative Hex skills can be assessed by a simple tournament. This will has a round-robin format: every agent plays every other agent in one series of G games. For example, if M = 5 and G = 25, then there will be 5 * 4 = 10 different series, each involving 25 games.
 
 ## Configuration files ⚙️
 
